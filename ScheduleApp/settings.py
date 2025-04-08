@@ -37,6 +37,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.admin',
+    'supervisor.apps.SupervisorConfig',
+    'instructor.apps.InstructorConfig',
+    'TeachingAssistant.apps.TeachingassistantConfig'
 ]
 
 MIDDLEWARE = [
