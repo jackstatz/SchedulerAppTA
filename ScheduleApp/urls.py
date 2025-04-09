@@ -22,5 +22,5 @@ from ScheduleAppData.views import AdminDashboard
 
 urlpatterns = [
        path('admin/', admin.site.urls),
-       path('', AdminDashboard.as_view())
+       path('adminDashboard/', AdminDashboard.as_view())
 ]
