@@ -18,6 +18,9 @@ from django.contrib import admin
 # from django.contrib import admin
 from django.urls import path
 
+from ScheduleAppData.views import AdminDashboard
+
 urlpatterns = [
        path('admin/', admin.site.urls),
+       path('', AdminDashboard.as_view())
 ]
