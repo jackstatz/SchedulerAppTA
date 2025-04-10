@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.admin',
     'supervisor.apps.SupervisorConfig',
     'instructor.apps.InstructorConfig',
-    'TeachingAssistant.apps.TeachingassistantConfig'
+    'TeachingAssistant.apps.TeachingassistantConfig',
+    'authenticate.apps.AuthenticateConfig'
 ]
 
 MIDDLEWARE = [
