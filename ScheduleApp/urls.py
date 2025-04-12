@@ -17,11 +17,15 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+import authentication
 from ScheduleAppData.views import AdminDashboard
+from authentication import urls
 
 urlpatterns = [
+    path('', include('authentication.urls')),
     path('admin/', admin.site.urls),
     path('login/', include('django.contrib.auth.urls')),
-    path('', include('authenticate.urls')),
+    path('login/', include('authentication.urls')),
+
     path('adminDashboard/', AdminDashboard.as_view())
 ]
