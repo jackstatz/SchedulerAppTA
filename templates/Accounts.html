@@ -1,0 +1,47 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Accounts</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <div class="container">
+        <h1>All Accounts</h1>
+        <table border="1" width="100%">
+            <thead>
+                <tr>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Role</th>
+                    <th>Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for account in accounts %}
+                <tr>
+                    <td>{{ account.FirstName }}</td>
+                    <td>{{ account.LastName }}</td>
+                    <td>{{ account.Email }}</td>
+                    <td>{{ account.Phone }}</td>
+                    <td>{{ account.Role }}</td>
+                    <td>
+                        <form method="POST" action="/accounts/">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="delete_account">
+                            <input type="hidden" name="account_id" value="{{ account.Id }}">
+                            <button type="submit" style="color: red;">X</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <a href="/adminDashboard/" class="button">Back to Dashboard</a>
+    </div>
+</body>
+</html>
