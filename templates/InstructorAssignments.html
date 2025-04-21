@@ -1,0 +1,99 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Assignments</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <script>
+        function showEditForm(assignmentId, assignmentName, dueDate) {
+            document.getElementById('edit-assignment-id').value = assignmentId;
+            document.getElementById('edit-assignment-name').value = assignmentName;
+            document.getElementById('edit-due-date').value = dueDate;
+            document.getElementById('edit-assignment-form').style.display = 'block';
+        }
+
+        function showCreateForm() {
+            document.getElementById('create-assignment-form').style.display = 'block';
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Manage Course Assignments</h1>
+
+        <div class="section">
+            <h2>Current Assignments</h2>
+            <button onclick="showCreateForm()" class="button">Create New Assignment</button>
+            <table border="1" width="100%">
+                <thead>
+                    <tr>
+                        <th>Assignment Name</th>
+                        <th>Course</th>
+                        <th>Due Date</th>
+                        <th>Edit</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for assignment in assignments %}
+                    <tr>
+                        <td>{{ assignment.AssignmentName }}</td>
+                        <td>{{ assignment.CourseId.CourseName }}</td>
+                        <td>{{ assignment.DueDate }}</td>
+                        <td>
+                            <button onclick="showEditForm('{{ assignment.Id }}', '{{ assignment.AssignmentName }}', '{{ assignment.DueDate|date:'Y-m-d' }}')" class="button" style="width: auto;">Edit</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div id="edit-assignment-form" style="display: none;" class="section">
+                <h3>Edit Assignment</h3>
+                <form method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="edit_assignment">
+                    <input type="hidden" id="edit-assignment-id" name="assignment_id">
+                    <div class="form-group">
+                        <label for="edit-assignment-name">Assignment Name</label>
+                        <input type="text" id="edit-assignment-name" name="assignment_name" class="text-field" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-due-date">Due Date</label>
+                        <input type="date" id="edit-due-date" name="due_date" class="text-field" required>
+                    </div>
+                    <button type="submit" class="button">Save Changes</button>
+                </form>
+            </div>
+
+            <div id="create-assignment-form" style="display: none;" class="section">
+                <h3>Create New Assignment</h3>
+                <form method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="create_assignment">
+                    <div class="form-group">
+                        <label for="course">Course</label>
+                        <select name="course_id" id="course" class="select" style="width: 300px;" required>
+                            {% for course in courses %}
+                                <option value="{{ course.Id }}">{{ course.CourseName }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="assignment-name">Assignment Name</label>
+                        <input type="text" id="assignment-name" name="assignment_name" class="text-field" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="due-date">Due Date</label>
+                        <input type="date" id="due-date" name="due_date" class="text-field" required>
+                    </div>
+                    <button type="submit" class="button">Create Assignment</button>
+                </form>
+            </div>
+        </div>
+
+        <a href="/instructor/" class="button">Back to Dashboard</a>
+    </div>
+</body>
+</html>
