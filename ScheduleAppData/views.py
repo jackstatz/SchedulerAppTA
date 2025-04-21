@@ -51,6 +51,23 @@ def deleteCourse(course_id=None):
         return redirect("/courses/")  # Redirect back to the accounts page
     except User.DoesNotExist:
         return JsonResponse({"error": "Account not found."}, status=404)
+
+def AuthenticateUser(email=None, password=None):
+    if email is None or password is None:
+        return False
+
+    try:
+        # Fetch the user with the given email
+        user = User.objects.get(Email=email)
+
+        # Compare the provided password with the stored password
+        if password == user.Password:
+            return user
+        else:
+            return False
+    except User.DoesNotExist:
+        return False
+
 class AdminDashboard(View):
     def get(self, request):
         return render(request, "AdminDashboard.html")
@@ -79,6 +96,19 @@ class AdminDashboard(View):
             case _:
                 return JsonResponse({"error": "Invalid action."}, status=400)
 
+
+class InstructorDashboard(View):
+    def get(self, request):
+        return render(request, "InstructorDashboard.html")
+    def post(self, request):
+        pass
+
+class TADashboard(View):
+    def get(self, request):
+        return render(request, "TADashboard.html")
+    def post(self, request):
+        pass
+
 class Accounts(View):
     def get(self, request):
         AllAccounts = User.objects.all().values("FirstName", "LastName", "Email", "Phone", "Role", "Id")
@@ -105,3 +135,24 @@ class Courses(View):
             deleteCourse(course_id)
             return JsonResponse({"message": "Course deleted successfully! Use back button to get back to All Courses."})
         return self.get(request)
+
+
+class Login(View):
+    def get(self, request):
+        return render(request, 'LoginPage.html')
+    def post(self, request):
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        validUser = AuthenticateUser(email, password)
+
+        if validUser:
+            match validUser.Role:
+                case 'Supervisor':
+                    return redirect('/adminDashboard')
+                case 'Instructor':
+                    return redirect('/InstructorDashboard')
+                case 'TA':
+                    return redirect('/TADashboard')
+        else:
+            return JsonResponse('Login failed.')
+
