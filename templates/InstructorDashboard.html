@@ -1,0 +1,39 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instructor Dashboard</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <div class="container">
+        <h1>Instructor Dashboard</h1>
+
+        <!-- Account Section -->
+        <div class="section">
+            <h2>Account Management</h2>
+            <a href="/instructor/profile" class="button">Edit Profile</a>
+        </div>
+
+        <!-- Courses Section -->
+        <div class="section">
+            <h2>Course Management</h2>
+            <a href="/instructor/courses" class="button">View Courses</a>
+        </div>
+
+        <!-- Lab Assignments Section -->
+        <div class="section">
+            <h2>TA Lab Assignments</h2>
+            <a href="/instructor/lab-assignments" class="button">Manage Lab Assignments</a>
+        </div>
+
+        <!-- Course Assignments Section -->
+        <div class="section">
+            <h2>Course Assignments</h2>
+            <a href="/instructor/assignments" class="button">Manage Assignments</a>
+        </div>
+    </div>
+</body>
+</html>
