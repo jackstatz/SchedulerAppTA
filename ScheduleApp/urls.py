@@ -17,7 +17,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
-from ScheduleAppData.views import AdminDashboard, Accounts, Courses, Login, InstructorDashboard, TADashboard
+from ScheduleAppData.views import AdminDashboard, Accounts, Courses, Login, InstructorDashboard, TADashboard, \
+    CoursePage, AccountPage
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -27,4 +28,6 @@ urlpatterns = [
     path('courses/', Courses.as_view()),
     path('instructorDashboard/', InstructorDashboard.as_view()),
     path('TADashboard', TADashboard.as_view()),
+    path('course/<int:course_id>/', CoursePage.as_view(), name='course_page'),
+    path('account/<int:account_id>/', AccountPage.as_view(), name='account_page'),
 ]

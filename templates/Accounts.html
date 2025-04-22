@@ -13,8 +13,7 @@
         <table border="1" width="100%">
             <thead>
                 <tr>
-                    <th>First Name</th>
-                    <th>Last Name</th>
+                    <th>Name</th>
                     <th>Email</th>
                     <th>Phone</th>
                     <th>Role</th>
@@ -24,8 +23,9 @@
             <tbody>
                 {% for account in accounts %}
                 <tr>
-                    <td>{{ account.FirstName }}</td>
-                    <td>{{ account.LastName }}</td>
+                    <td>
+                        <a href="{% url 'account_page' account.Id %}">{{ account.FirstName }} {{ account.LastName }}</a>
+                    </td>
                     <td>{{ account.Email }}</td>
                     <td>{{ account.Phone }}</td>
                     <td>{{ account.Role }}</td>

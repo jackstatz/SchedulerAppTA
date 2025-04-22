@@ -1,9 +1,9 @@
 from django.http import JsonResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
 from django.db import IntegrityError
 
-from ScheduleAppData.models import User, Courses
+from ScheduleAppData.models import User, Courses, Assignments, Sections
 
 
 # Create your views here.
@@ -19,6 +19,21 @@ def create_course(title, semester, year):
         )
     except IntegrityError:
         return JsonResponse({"error": "A course with this name already exists."}, status=400)
+
+def add_assignment(request, course):
+    """Helper method to handle adding an assignment."""
+    assignment_name = request.POST.get("assignment_name")
+    due_date = request.POST.get("due_date")
+    Assignments.objects.create(AssignmentName=assignment_name, DueDate=due_date, CourseId=course)
+
+def add_section(request, course):
+    """Helper method to handle adding a section."""
+    section_num = request.POST.get("section_num")
+    schedule = request.POST.get("schedule")
+    instructor_email = request.POST.get("instructor_email")
+    instructor = User.objects.filter(Email=instructor_email).first()
+    if instructor:
+        Sections.objects.create(SectionNum=section_num, Schedule=schedule, InstructorId=instructor, CourseId=course)
 
 
 def create_account(first_name, last_name, email, password, phone, role):
@@ -156,3 +171,56 @@ class Login(View):
         else:
             return JsonResponse('Login failed.')
 
+class CoursePage(View):
+    def get(self, request, course_id):
+        from ScheduleAppData.models import Courses
+        # Retrieve the course using the course_id from the URL
+        course = Courses.objects.get(Id=course_id)
+        assignments = Assignments.objects.filter(CourseId=course)
+        sections = Sections.objects.filter(CourseId=course)
+
+        # Render the page with course, assignments, and sections
+        return render(request, 'CoursePage.html', {
+            'course': course,
+            'assignments': assignments,
+            'sections': sections
+        })
+
+    def post(self, request, course_id):
+        from ScheduleAppData.models import Assignments, Courses, Sections
+        # Retrieve the course using the course_id from the URL
+        course = Courses.objects.get(Id=course_id)
+
+        if "add_assignment" in request.POST:
+            add_assignment(request, course)
+
+        elif "add_section" in request.POST:
+            add_section(request, course)
+
+        # Fetch updated assignments and sections after the POST operation
+        assignments = Assignments.objects.filter(CourseId=course)
+        sections = Sections.objects.filter(CourseId=course)
+
+        # Re-render the page with updated data
+        return render(request, 'CoursePage.html', {
+            'course': course,
+            'assignments': assignments,
+            'sections': sections
+        })
+
+class AccountPage(View):
+    def get(self, request, account_id):
+        # Retrieve the account using the account_id
+        account = get_object_or_404(User, pk=account_id)
+        return render(request, 'AccountPage.html', {'account': account})
+
+    def post(self, request, account_id):
+        # Retrieve the account using the account_id
+        account = get_object_or_404(User, pk=account_id)
+
+        # Handle account updates (example: updating phone number)
+        if "update_account" in request.POST:
+            account.Phone = request.POST.get("phone")
+            account.save()
+
+        return render(request, 'AccountPage.html', {'account': account})
