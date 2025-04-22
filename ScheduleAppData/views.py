@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect
 from django.views import View
 from django.db import IntegrityError
 
-from ScheduleAppData.models import User, Courses
+from ScheduleAppData.models import User, Courses, Sections, Assignments, LabAssignment
 
 
 # Create your views here.
@@ -156,3 +156,125 @@ class Login(View):
         else:
             return JsonResponse('Login failed.')
 
+
+
+# Instructor Dashboard
+class InstructorDashboard(View):
+    def get(self, request):
+        return render(request, "InstructorDashboard.html")
+
+
+class InstructorProfile(View):
+    def get(self, request):
+        instructor_id = 1
+        instructor = User.objects.get(Id=instructor_id)
+        return render(request, "InstructorProfile.html", {'instructor': instructor})
+
+    def post(self, request):
+        instructor_id = 1
+        instructor = User.objects.get(Id=instructor_id)
+
+        # Update the instructor's information
+        instructor.Email = request.POST.get("email")
+        instructor.OfficeHours = request.POST.get("officehours")
+        instructor.OfficeLocation = request.POST.get("officelocation")
+        instructor.save()
+
+        return redirect("/instructor/profile")
+
+
+class InstructorCourses(View):
+    def get(self, request):
+        instructor_id = 1
+        courses = Courses.objects.filter(sections__InstructorId=instructor_id).distinct()
+        return render(request, "InstructorCourses.html", {'courses': courses})
+
+    def post(self, request):
+        action = request.POST.get("action")
+        if action == "edit_course":
+            course_id = request.POST.get("course_id")
+            course_name = request.POST.get("course_name")
+
+            course = Courses.objects.get(Id=course_id)
+            course.CourseName = course_name
+            course.save()
+
+        return redirect("/instructor/courses")
+
+
+class InstructorLabAssignments(View):
+    def get(self, request):
+        instructor_id = 1
+        courses = Courses.objects.filter(sections__InstructorId=instructor_id).distinct()
+        sections = Sections.objects.filter(InstructorId=instructor_id, SectionType="Lab")
+        tas = User.objects.filter(Role="TA")
+
+        # Get current assignments
+        assignments = LabAssignment.objects.filter(SectionId__InstructorId=instructor_id)
+
+        return render(request, "InstructorLabAssignments.html", {
+            'courses': courses,
+            'sections': sections,
+            'tas': tas,
+            'assignments': assignments
+        })
+
+    def post(self, request):
+        action = request.POST.get("action")
+        if action == "assign_ta":
+            section_id = request.POST.get("section_id")
+            ta_id = request.POST.get("ta_id")
+
+            # Check if assignment already exists
+            existing = LabAssignment.objects.filter(SectionId_id=section_id)
+            if existing.exists():
+                # Update existing assignment
+                assignment = existing.first()
+                assignment.TAId_id = ta_id
+                assignment.save()
+            else:
+                # Create new assignment
+                LabAssignment.objects.create(
+                    SectionId_id=section_id,
+                    TAId_id=ta_id
+                )
+
+        return redirect("/instructor/lab-assignments")
+
+
+class InstructorAssignments(View):
+    def get(self, request):
+        instructor_id = 1
+        courses = Courses.objects.filter(sections__InstructorId=instructor_id).distinct()
+        assignments = Assignments.objects.filter(CourseId__in=courses)
+
+        return render(request, "InstructorAssignments.html", {
+            'courses': courses,
+            'assignments': assignments
+        })
+
+    def post(self, request):
+        action = request.POST.get("action")
+
+        if action == "edit_assignment":
+            assignment_id = request.POST.get("assignment_id")
+            assignment_name = request.POST.get("assignment_name")
+            due_date = request.POST.get("due_date")
+
+            assignment = Assignments.objects.get(Id=assignment_id)
+            assignment.AssignmentName = assignment_name
+            assignment.DueDate = due_date
+            assignment.save()
+
+        elif action == "create_assignment":
+            assignment_name = request.POST.get("assignment_name")
+            due_date = request.POST.get("due_date")
+            course_id = request.POST.get("course_id")
+
+            Assignments.objects.create(
+                AssignmentName=assignment_name,
+                DueDate=due_date,
+                CourseId_id=course_id
+            )
+
+        return redirect("/instructor/assignments")
