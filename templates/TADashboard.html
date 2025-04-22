@@ -10,7 +10,7 @@
 <body>
     <div class="container">
         <h1>TA Dashboard</h1>
-
+        <a href='/' class="button" style="position: absolute; top: 20px; right: 20px;">Log Out</a>
         <!-- Editable Account Information Section -->
         <div class="section">
             <h2>Account Information</h2>
@@ -41,16 +41,15 @@
             <h2>My Courses</h2>
             {% for course in courses %}
                 <div class="course">
-                    <h3>{{ course.CourseName }} ({{ course.Semester }} {{ course.Year }})</h3>
+                    <h3>{{ course.CourseName }} {{ course.Semester }} {{ course.Year }}</h3>
 
                     <!-- Sections of the Course -->
                     <h4>Sections</h4>
                     <ul>
-                        {% for section in course.sections %}
+                        {% for section in sections %}
                             <li>
                                 <strong>Section:</strong> {{ section.SectionNum }}<br>
                                 <strong>Schedule:</strong> {{ section.Schedule }}<br>
-                                <strong>Type:</strong> {{ section.SectionType }}<br>
                                 <strong>Instructor:</strong> {{ section.InstructorId.FirstName }} {{ section.InstructorId.LastName }}
                             </li>
                         {% endfor %}
