@@ -14,25 +14,19 @@
         <!-- Account Section -->
         <div class="section">
             <h2>Account Management</h2>
-            <a href="/instructor/profile" class="button">Edit Profile</a>
+            <a href="{% url 'instructor_profile' instructor.Id %}" class="button">Edit Profile</a>
         </div>
 
         <!-- Courses Section -->
         <div class="section">
             <h2>Course Management</h2>
-            <a href="/instructor/courses" class="button">View Courses</a>
-        </div>
-
-        <!-- Lab Assignments Section -->
-        <div class="section">
-            <h2>TA Lab Assignments</h2>
-            <a href="/instructor/lab-assignments" class="button">Manage Lab Assignments</a>
+            <a href="{% url 'instructor_courses' instructor.Id %}" class="button">View Courses</a>
         </div>
 
         <!-- Course Assignments Section -->
         <div class="section">
             <h2>Course Assignments</h2>
-            <a href="/instructor/assignments" class="button">Manage Assignments</a>
+            <a href="{% url 'instructor_assignments' instructor.Id %}" class="button">Manage Assignments</a>
         </div>
     </div>
 </body>

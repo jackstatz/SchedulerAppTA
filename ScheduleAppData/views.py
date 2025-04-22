@@ -21,6 +21,21 @@ def create_course(title, semester, year):
         return JsonResponse({"error": "A course with this name already exists."}, status=400)
 
 
+def add_assignment(request, course):
+    """Helper method to handle adding an assignment."""
+    assignment_name = request.POST.get("assignment_name")
+    due_date = request.POST.get("due_date")
+    Assignments.objects.create(AssignmentName=assignment_name, DueDate=due_date, CourseId=course)
+
+def add_section(request, course):
+    """Helper method to handle adding a section."""
+    section_num = request.POST.get("section_num")
+    schedule = request.POST.get("schedule")
+    instructor_email = request.POST.get("instructor_email")
+    instructor = User.objects.filter(Email=instructor_email).first()
+    if instructor:
+        Sections.objects.create(SectionNum=section_num, Schedule=schedule, InstructorId=instructor, CourseId=course)
+
 def create_account(first_name, last_name, email, password, phone, role):
     try:
         # Create a new user
@@ -68,6 +83,14 @@ def AuthenticateUser(email=None, password=None):
     except User.DoesNotExist:
         return False
 
+def update_account(request, instructor):
+    """Helper method to update the instructor's account information."""
+    instructor.FirstName = request.POST.get("firstName")
+    instructor.LastName = request.POST.get("lastName")
+    instructor.Email = request.POST.get("email")
+    instructor.Phone = request.POST.get("phone")
+    instructor.save()
+
 class AdminDashboard(View):
     def get(self, request):
         return render(request, "AdminDashboard.html")
@@ -95,19 +118,6 @@ class AdminDashboard(View):
                 return JsonResponse({"message": "Course created successfully! Use back button to get back to dashboard."})
             case _:
                 return JsonResponse({"error": "Invalid action."}, status=400)
-
-
-class InstructorDashboard(View):
-    def get(self, request):
-        return render(request, "InstructorDashboard.html")
-    def post(self, request):
-        pass
-
-class TADashboard(View):
-    def get(self, request):
-        return render(request, "TADashboard.html")
-    def post(self, request):
-        pass
 
 class Accounts(View):
     def get(self, request):
@@ -150,46 +160,45 @@ class Login(View):
                 case 'Supervisor':
                     return redirect('/adminDashboard')
                 case 'Instructor':
-                    return redirect('/InstructorDashboard')
+                    return redirect('instructor_dashboard', instructor_id=validUser.Id)
                 case 'TA':
-                    return redirect('/TADashboard')
+                    return redirect('TA_dashboard', TA_id=validUser.Id)
         else:
-            return JsonResponse('Login failed.')
+            return render(request, 'LoginPage.html')
 
 
 
 # Instructor Dashboard
 class InstructorDashboard(View):
-    def get(self, request):
-        return render(request, "InstructorDashboard.html")
+    def get(self, request, instructor_id):
+        instructor = User.objects.get(Id=instructor_id)
+        return render(request, "InstructorDashboard.html", {'instructor': instructor})
 
 
 class InstructorProfile(View):
-    def get(self, request):
-        instructor_id = 1
+    def get(self, request, instructor_id):
         instructor = User.objects.get(Id=instructor_id)
         return render(request, "InstructorProfile.html", {'instructor': instructor})
 
-    def post(self, request):
-        instructor_id = 1
+    def post(self, request, instructor_id):
         instructor = User.objects.get(Id=instructor_id)
 
         # Update the instructor's information
         instructor.Email = request.POST.get("email")
-        instructor.OfficeHours = request.POST.get("officehours")
-        instructor.OfficeLocation = request.POST.get("officelocation")
         instructor.save()
 
-        return redirect("/instructor/profile")
+        return redirect('instructor_dashboard', instructor_id=instructor.Id)
 
 
 class InstructorCourses(View):
-    def get(self, request):
-        instructor_id = 1
+    def get(self, request, instructor_id):
+        from ScheduleAppData.models import Courses
         courses = Courses.objects.filter(sections__InstructorId=instructor_id).distinct()
-        return render(request, "InstructorCourses.html", {'courses': courses})
+        instructor = User.objects.get(Id=instructor_id)
+        return render(request, "InstructorCourses.html", {'courses': courses, 'instructor': instructor})
 
-    def post(self, request):
+    def post(self, request, instructor_id):
+        from ScheduleAppData.models import Courses
         action = request.POST.get("action")
         if action == "edit_course":
             course_id = request.POST.get("course_id")
@@ -199,12 +208,13 @@ class InstructorCourses(View):
             course.CourseName = course_name
             course.save()
 
-        return redirect("/instructor/courses")
+        return redirect('instructor_courses', instructor_id=instructor_id)
 
 
 class InstructorLabAssignments(View):
-    def get(self, request):
-        instructor_id = 1
+    def get(self, request, instructor_id):
+        from ScheduleAppData.models import LabAssignment, Courses, Sections
+        instructor = User.objects.get(Id=instructor_id)
         courses = Courses.objects.filter(sections__InstructorId=instructor_id).distinct()
         sections = Sections.objects.filter(InstructorId=instructor_id, SectionType="Lab")
         tas = User.objects.filter(Role="TA")
@@ -216,10 +226,12 @@ class InstructorLabAssignments(View):
             'courses': courses,
             'sections': sections,
             'tas': tas,
-            'assignments': assignments
+            'assignments': assignments,
+            'instructor': instructor
         })
 
-    def post(self, request):
+    def post(self, request, instructor_id):
+        from ScheduleAppData.models import LabAssignment, Courses, Sections
         action = request.POST.get("action")
         if action == "assign_ta":
             section_id = request.POST.get("section_id")
@@ -239,21 +251,24 @@ class InstructorLabAssignments(View):
                     TAId_id=ta_id
                 )
 
-        return redirect("/instructor/lab-assignments")
+        return redirect('instructor_lab_assignments', instructor_id=instructor_id)
 
 
 class InstructorAssignments(View):
-    def get(self, request):
-        instructor_id = 1
+    def get(self, request, instructor_id):
+        from ScheduleAppData.models import LabAssignment, Courses, Sections
         courses = Courses.objects.filter(sections__InstructorId=instructor_id).distinct()
         assignments = Assignments.objects.filter(CourseId__in=courses)
+        instructor = User.objects.get(Id=instructor_id)
 
         return render(request, "InstructorAssignments.html", {
             'courses': courses,
-            'assignments': assignments
+            'assignments': assignments,
+            'instructor': instructor
         })
 
-    def post(self, request):
+    def post(self, request, instructor_id):
+        from ScheduleAppData.models import Assignments
         action = request.POST.get("action")
 
         if action == "edit_assignment":
@@ -277,4 +292,86 @@ class InstructorAssignments(View):
                 CourseId_id=course_id
             )
 
-        return redirect("/instructor/assignments")
+        return redirect('instructor_assignments', instructor_id=instructor_id)
+
+class TADashboard(View):
+    def get(self, request, TA_id):
+        from ScheduleAppData.models import Courses, Assignments, Sections
+        # Retrieve the instructor's account information
+        TA = User.objects.get(pk=TA_id)
+
+        # Retrieve all courses assigned to the instructor
+        courses = Courses.objects.filter(sections__InstructorId=TA).distinct()
+
+        # Add sections and assignments to each course
+        for course in courses:
+            course.sections = Sections.objects.filter(CourseId=course)
+            course.assignments = Assignments.objects.filter(CourseId=course)
+
+        return render(request, 'TADashboard.html', {
+            'TA': TA,
+            'courses': courses
+        })
+    def post(self, request, TA_id):
+        # Retrieve the instructor's account information
+        TA = User.objects.get(pk=TA_id)
+
+        if "update_account" in request.POST:
+            update_account(request, TA)
+
+        # Redirect to the same page to reflect changes
+        return self.get(request, TA_id)
+
+class CoursePage(View):
+    def get(self, request, course_id):
+        from ScheduleAppData.models import Courses
+        # Retrieve the course using the course_id from the URL
+        course = Courses.objects.get(Id=course_id)
+        assignments = Assignments.objects.filter(CourseId=course)
+        sections = Sections.objects.filter(CourseId=course)
+
+        # Render the page with course, assignments, and sections
+        return render(request, 'CoursePage.html', {
+            'course': course,
+            'assignments': assignments,
+            'sections': sections
+        })
+
+    def post(self, request, course_id):
+        from ScheduleAppData.models import Assignments, Courses, Sections
+        # Retrieve the course using the course_id from the URL
+        course = Courses.objects.get(Id=course_id)
+
+        if "add_assignment" in request.POST:
+            add_assignment(request, course)
+
+        elif "add_section" in request.POST:
+            add_section(request, course)
+
+        # Fetch updated assignments and sections after the POST operation
+        assignments = Assignments.objects.filter(CourseId=course)
+        sections = Sections.objects.filter(CourseId=course)
+
+        # Re-render the page with updated data
+        return render(request, 'CoursePage.html', {
+            'course': course,
+            'assignments': assignments,
+            'sections': sections
+        })
+
+class AccountPage(View):
+    def get(self, request, account_id):
+        # Retrieve the account using the account_id
+        account = User.objects.get(Id=account_id)
+        return render(request, 'AccountPage.html', {'account': account})
+
+    def post(self, request, account_id):
+        # Retrieve the account using the account_id
+        account = User.objects.get(Id=account_id)
+
+        # Handle account updates (example: updating phone number)
+        if "update_account" in request.POST:
+            account.Phone = request.POST.get("phone")
+            account.save()
+
+        return render(request, 'AccountPage.html', {'account': account})
