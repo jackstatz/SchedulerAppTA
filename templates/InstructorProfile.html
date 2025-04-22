@@ -19,19 +19,11 @@
                     <label for="email">Email</label>
                     <input type="email" id="email" name="email" class="text-field" value="{{ instructor.Email }}" required>
                 </div>
-                <div class="form-group">
-                    <label for="officehours">Office Hours</label>
-                    <input type="text" id="officehours" name="officehours" class="text-field" value="{{ instructor.OfficeHours }}" placeholder="Mon/Wed 10:00 AM - 12:00 PM">
-                </div>
-                <div class="form-group">
-                    <label for="officelocation">Office Location</label>
-                    <input type="text" id="officelocation" name="officelocation" class="text-field" value="{{ instructor.OfficeLocation }}" placeholder="Science Building, Room 301">
-                </div>
                 <button type="submit" class="button">Save Changes</button>
             </form>
         </div>
 
-        <a href="/instructor/" class="button">Back to Dashboard</a>
+        <a href="{% url 'instructor_dashboard' instructor.Id %}" class="button">Back to Dashboard</a>
     </div>
 </body>
 </html>
