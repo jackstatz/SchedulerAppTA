@@ -22,7 +22,9 @@
             <tbody>
                 {% for Course in Courses %}
                 <tr>
-                    <td>{{ Course.CourseName }}</td>
+                    <td>
+                        <a href="{% url 'course_page' Course.Id %}">{{ Course.CourseName }}</a>
+                    </td>
                     <td>{{ Course.Semester }}</td>
                     <td>{{ Course.Year }}</td>
                     <td>
