@@ -1,0 +1,74 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <title>Instructor Dashboard</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Instructor Dashboard</h1>
+
+        <!-- Editable Account Information Section -->
+        <div class="section">
+            <h2>Account Information</h2>
+            <form method="POST">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="firstName">First Name:</label>
+                    <input type="text" id="firstName" name="firstName" value="{{ instructor.FirstName }}" class="text-field" required>
+                </div>
+                <div class="form-group">
+                    <label for="lastName">Last Name:</label>
+                    <input type="text" id="lastName" name="lastName" value="{{ instructor.LastName }}" class="text-field" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" value="{{ instructor.Email }}" class="text-field" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Phone:</label>
+                    <input type="tel" id="phone" name="phone" value="{{ instructor.Phone }}" class="text-field" required>
+                </div>
+                <button type="submit" name="update_account" class="button">Save Changes</button>
+            </form>
+        </div>
+
+        <!-- Courses Section -->
+        <div class="section">
+            <h2>My Courses</h2>
+            {% for course in courses %}
+                <div class="course">
+                    <h3>{{ course.CourseName }} ({{ course.Semester }} {{ course.Year }})</h3>
+
+                    <!-- Sections of the Course -->
+                    <h4>Sections</h4>
+                    <ul>
+                        {% for section in course.sections %}
+                            <li>
+                                <strong>Section:</strong> {{ section.SectionNum }}<br>
+                                <strong>Schedule:</strong> {{ section.Schedule }}<br>
+                                <strong>Type:</strong> {{ section.SectionType }}<br>
+                                <strong>Instructor:</strong> {{ section.InstructorId.FirstName }} {{ section.InstructorId.LastName }}
+                            </li>
+                        {% endfor %}
+                    </ul>
+
+                    <!-- Assignments of the Course -->
+                    <h4>Assignments</h4>
+                    <ul>
+                        {% for assignment in course.assignments %}
+                            <li>
+                                <strong>Assignment:</strong> {{ assignment.AssignmentName }}<br>
+                                <strong>Due Date:</strong> {{ assignment.DueDate }}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>

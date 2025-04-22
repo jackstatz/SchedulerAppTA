@@ -20,6 +20,14 @@ def create_course(title, semester, year):
     except IntegrityError:
         return JsonResponse({"error": "A course with this name already exists."}, status=400)
 
+def update_account(request, instructor):
+    """Helper method to update the instructor's account information."""
+    instructor.FirstName = request.POST.get("firstName")
+    instructor.LastName = request.POST.get("lastName")
+    instructor.Email = request.POST.get("email")
+    instructor.Phone = request.POST.get("phone")
+    instructor.save()
+
 def add_assignment(request, course):
     """Helper method to handle adding an assignment."""
     assignment_name = request.POST.get("assignment_name")
@@ -32,8 +40,9 @@ def add_section(request, course):
     schedule = request.POST.get("schedule")
     instructor_email = request.POST.get("instructor_email")
     instructor = User.objects.filter(Email=instructor_email).first()
+    type = request.POST.get("type")
     if instructor:
-        Sections.objects.create(SectionNum=section_num, Schedule=schedule, InstructorId=instructor, CourseId=course)
+        Sections.objects.create(SectionNum=section_num, Schedule=schedule, InstructorId=instructor, SectionType=type, CourseId=course)
 
 
 def create_account(first_name, last_name, email, password, phone, role):
@@ -165,9 +174,9 @@ class Login(View):
                 case 'Supervisor':
                     return redirect('/adminDashboard')
                 case 'Instructor':
-                    return redirect('/InstructorDashboard')
+                    return redirect('instructor_dashboard', instructor_id=validUser.Id)
                 case 'TA':
-                    return redirect('/TADashboard')
+                    return redirect('TA_dashboard', TA_id=validUser.Id)
         else:
             return JsonResponse('Login failed.')
 
@@ -224,3 +233,59 @@ class AccountPage(View):
             account.save()
 
         return render(request, 'AccountPage.html', {'account': account})
+
+class InstructorDashboard(View):
+    def get(self, request, instructor_id):
+        from ScheduleAppData.models import Courses, Assignments, Sections
+        # Retrieve the instructor's account information
+        instructor = get_object_or_404(User, pk=instructor_id, Role="Instructor")
+
+        # Retrieve all courses assigned to the instructor
+        courses = Courses.objects.filter(sections__InstructorId=instructor).distinct()
+
+        # Add sections and assignments to each course
+        for course in courses:
+            course.sections = Sections.objects.filter(CourseId=course)
+            course.assignments = Assignments.objects.filter(CourseId=course)
+
+        return render(request, 'InstructorDashboard.html', {
+            'instructor': instructor,
+            'courses': courses
+        })
+    def post(self, request, instructor_id):
+        # Retrieve the instructor's account information
+        instructor = User.objects.get(pk=instructor_id)
+
+        if "update_account" in request.POST:
+            update_account(request, instructor)
+
+        # Redirect to the same page to reflect changes
+        return self.get(request, instructor_id)
+
+class TADashboard(View):
+    def get(self, request, TA_id):
+        from ScheduleAppData.models import Courses, Assignments, Sections
+        # Retrieve the instructor's account information
+        TA = User.objects.get(pk=TA_id)
+
+        # Retrieve all courses assigned to the instructor
+        courses = Courses.objects.filter(sections__InstructorId=TA).distinct()
+
+        # Add sections and assignments to each course
+        for course in courses:
+            course.sections = Sections.objects.filter(CourseId=course)
+            course.assignments = Assignments.objects.filter(CourseId=course)
+
+        return render(request, 'TADashboard.html', {
+            'TA': TA,
+            'courses': courses
+        })
+    def post(self, request, TA_id):
+        # Retrieve the instructor's account information
+        TA = User.objects.get(pk=TA_id)
+
+        if "update_account" in request.POST:
+            update_account(request, TA)
+
+        # Redirect to the same page to reflect changes
+        return self.get(request, TA_id)

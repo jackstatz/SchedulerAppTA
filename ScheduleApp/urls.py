@@ -25,9 +25,9 @@ urlpatterns = [
     path('', Login.as_view()),
     path('adminDashboard/', AdminDashboard.as_view()),
     path('accounts/', Accounts.as_view()),
-    path('courses/', Courses.as_view()),
-    path('instructorDashboard/', InstructorDashboard.as_view()),
-    path('TADashboard', TADashboard.as_view()),
+    path('courses/', Courses.as_view()),path('TADashboard/<int:TA_id>/', TADashboard.as_view(), name='TA_dashboard'),
     path('course/<int:course_id>/', CoursePage.as_view(), name='course_page'),
     path('account/<int:account_id>/', AccountPage.as_view(), name='account_page'),
+    path('instructorDashboard/<int:instructor_id>/', InstructorDashboard.as_view(), name='instructor_dashboard'),
+
 ]
