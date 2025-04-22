@@ -15,6 +15,9 @@ class User(models.Model):
     Phone = models.CharField(max_length=120)
     Role = models.CharField(choices=Role.choices, max_length=20)
 
+    OfficeHours = models.CharField(max_length=120, null=True, blank=True)
+    OfficeLocation = models.CharField(max_length=120, null=True, blank=True)
+
 class Courses(models.Model):
     Id = models.AutoField(primary_key=True)
     CourseName = models.CharField(max_length=120)
@@ -40,3 +43,9 @@ class Assignments(models.Model):
     DueDate = models.DateField()
     ## The ID of the course this assignment is a part of
     CourseId = models.ForeignKey(Courses, on_delete=models.CASCADE)
+
+# Model to track the TA lab assignments
+class LabAssignment(models.Model):
+    Id = models.AutoField(primary_key=True)
+    SectionId = models.ForeignKey(Sections, on_delete=models.CASCADE)
+    TAId = models.ForeignKey(User, on_delete=models.CASCADE)

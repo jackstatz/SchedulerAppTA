@@ -17,17 +17,21 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
-from ScheduleAppData.views import AdminDashboard, Accounts, Courses, Login, InstructorDashboard, TADashboard, \
-    CoursePage, AccountPage
+from ScheduleAppData.views import AdminDashboard, Accounts, Courses, InstructorDashboard, InstructorProfile, InstructorCourses, InstructorLabAssignments, InstructorAssignments
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', Login.as_view()),
+    path('login/', include('django.contrib.auth.urls')),
+    path('', AdminDashboard.as_view()),
     path('adminDashboard/', AdminDashboard.as_view()),
     path('accounts/', Accounts.as_view()),
-    path('courses/', Courses.as_view()),path('TADashboard/<int:TA_id>/', TADashboard.as_view(), name='TA_dashboard'),
-    path('course/<int:course_id>/', CoursePage.as_view(), name='course_page'),
-    path('account/<int:account_id>/', AccountPage.as_view(), name='account_page'),
-    path('instructorDashboard/<int:instructor_id>/', InstructorDashboard.as_view(), name='instructor_dashboard'),
+    path('courses/', Courses.as_view()),
+
+    #Instructor Dashboard
+    path('instructor/', InstructorDashboard.as_view()),
+    path('instructor/profile/', InstructorProfile.as_view()),
+    path('instructor/courses/', InstructorCourses.as_view()),
+    path('instructor/lab-assignments/', InstructorLabAssignments.as_view()),
+    path('instructor/assignments/', InstructorAssignments.as_view()),
 
 ]
