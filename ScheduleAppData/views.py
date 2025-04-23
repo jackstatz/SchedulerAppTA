@@ -323,14 +323,12 @@ class TADashboard(View):
         # Retrieve all courses assigned to the instructor
         courses = Courses.objects.filter(sections__InstructorId=TA).distinct()
 
-        # Add sections and assignments to each course
-        for course in courses:
-            course.sections = Sections.objects.filter(CourseId=course)
-            course.assignments = Assignments.objects.filter(CourseId=course)
+        Sections = Sections.objects.filter(InstructorId=TA.Id)
 
         return render(request, 'TADashboard.html', {
             'TA': TA,
-            'courses': courses
+            'courses': courses,
+            'sections': Sections
         })
     def post(self, request, TA_id):
         # Retrieve the instructor's account information
