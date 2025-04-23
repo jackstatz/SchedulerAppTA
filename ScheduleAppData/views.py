@@ -158,7 +158,7 @@ class Login(View):
         if validUser:
             match validUser.Role:
                 case 'Supervisor':
-                    return redirect('/adminDashboard')
+                    return redirect('/adminDashboard/')
                 case 'Instructor':
                     return redirect('instructor_dashboard', instructor_id=validUser.Id)
                 case 'TA':
