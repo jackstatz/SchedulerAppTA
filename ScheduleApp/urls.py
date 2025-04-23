@@ -22,8 +22,8 @@ from ScheduleAppData.views import AdminDashboard, Accounts, Courses, InstructorD
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', Login.as_view()),
-    path('adminDashboard/', AdminDashboard.as_view()),
+    path('', Login.as_view(), name='login'),
+    path('adminDashboard/', AdminDashboard.as_view(), name='adminDashboard'),
     path('accounts/', Accounts.as_view()),
     path('courses/', Courses.as_view()),
     path('course/<int:course_id>/', CoursePage.as_view(), name='course_page'),
