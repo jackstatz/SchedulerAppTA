@@ -37,6 +37,26 @@ def add_section(request, course):
         Sections.objects.create(SectionNum=section_num, Schedule=schedule, InstructorId=instructor, CourseId=course)
 
 def create_account(first_name, last_name, email, password, phone, role):
+
+    errors = {}
+    if not first_name:
+        errors['firstName'] = "First name cannot be empty."
+    if not last_name:
+        errors['lastName'] = "Last name cannot be empty."
+    if not email:
+        errors['email'] = "Email cannot be empty."
+    if not password:
+        errors['password'] = "Password cannot be empty."
+    if not phone:
+        errors['phone'] = "Phone number cannot be empty."
+    if not phone.isdigit():
+        errors['phone'] = "Phone number must contain only digits."
+    if len(phone) != 10:
+        errors['phone'] = "Phone number must be 9 digits."
+
+    if errors:
+        return JsonResponse({"errors": errors}, status=400)
+
     try:
         # Create a new user
         User.objects.create(
