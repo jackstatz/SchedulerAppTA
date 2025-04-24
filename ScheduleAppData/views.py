@@ -9,7 +9,20 @@ from ScheduleAppData.models import User, Courses, Sections, Assignments, LabAssi
 # Create your views here.
 def create_course(title, semester, year):
     from ScheduleAppData.models import Courses
-    # Handle course creation
+
+    errors = {}
+    if not title:
+        errors["Title"] = f"Title cannot be empty."
+    if not semester:
+        errors["Semester"] = f"Semester cannot be empty."
+    if not year:
+        errors["Year"] = f"Year cannot be empty."
+    if not year.isdigit():
+        errors["Year"] = "Year must contain only digits."
+    if errors:
+        return JsonResponse({"errors": errors}, status=400)
+
+
     try:
         # Create a new course
         Courses.objects.create(
@@ -17,6 +30,7 @@ def create_course(title, semester, year):
             Semester=semester,
             Year=year
         )
+        return True
     except IntegrityError:
         return JsonResponse({"error": "A course with this name already exists."}, status=400)
 
