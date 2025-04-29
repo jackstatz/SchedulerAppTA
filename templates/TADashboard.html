@@ -54,17 +54,6 @@
                             </li>
                         {% endfor %}
                     </ul>
-
-                    <!-- Assignments of the Course -->
-                    <h4>Assignments</h4>
-                    <ul>
-                        {% for assignment in course.assignments %}
-                            <li>
-                                <strong>Assignment:</strong> {{ assignment.AssignmentName }}<br>
-                                <strong>Due Date:</strong> {{ assignment.DueDate }}
-                            </li>
-                        {% endfor %}
-                    </ul>
                 </div>
             {% endfor %}
         </div>

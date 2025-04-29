@@ -34,13 +34,6 @@ class Sections(models.Model):
     ## The User ID of the instructor for this section
     InstructorId = models.ForeignKey(User, on_delete=models.CASCADE)
 
-class Assignments(models.Model):
-    Id = models.AutoField(primary_key=True)
-    AssignmentName = models.CharField(max_length=120)
-    DueDate = models.DateField()
-    ## The ID of the course this assignment is a part of
-    CourseId = models.ForeignKey(Courses, on_delete=models.CASCADE)
-
 # Model to track the TA lab assignments
 class LabAssignment(models.Model):
     Id = models.AutoField(primary_key=True)

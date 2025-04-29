@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect
 from django.views import View
 from django.db import IntegrityError
 
-from ScheduleAppData.models import User, Courses, Sections, Assignments, LabAssignment
+from ScheduleAppData.models import User, Courses, Sections, LabAssignment
 
 
 # Create your views here.
@@ -33,13 +33,6 @@ def create_course(title, semester, year):
         return True
     except IntegrityError:
         return JsonResponse({"error": "A course with this name already exists."}, status=400)
-
-
-def add_assignment(request, course):
-    """Helper method to handle adding an assignment."""
-    assignment_name = request.POST.get("assignment_name")
-    due_date = request.POST.get("due_date")
-    Assignments.objects.create(AssignmentName=assignment_name, DueDate=due_date, CourseId=course)
 
 def add_section(request, course):
     """Helper method to handle adding a section."""
@@ -287,50 +280,9 @@ class InstructorLabAssignments(View):
 
         return redirect('instructor_lab_assignments', instructor_id=instructor_id)
 
-
-class InstructorAssignments(View):
-    def get(self, request, instructor_id):
-        from ScheduleAppData.models import LabAssignment, Courses, Sections
-        courses = Courses.objects.filter(sections__InstructorId=instructor_id).distinct()
-        assignments = Assignments.objects.filter(CourseId__in=courses)
-        instructor = User.objects.get(Id=instructor_id)
-
-        return render(request, "InstructorAssignments.html", {
-            'courses': courses,
-            'assignments': assignments,
-            'instructor': instructor
-        })
-
-    def post(self, request, instructor_id):
-        from ScheduleAppData.models import Assignments
-        action = request.POST.get("action")
-
-        if action == "edit_assignment":
-            assignment_id = request.POST.get("assignment_id")
-            assignment_name = request.POST.get("assignment_name")
-            due_date = request.POST.get("due_date")
-
-            assignment = Assignments.objects.get(Id=assignment_id)
-            assignment.AssignmentName = assignment_name
-            assignment.DueDate = due_date
-            assignment.save()
-
-        elif action == "create_assignment":
-            assignment_name = request.POST.get("assignment_name")
-            due_date = request.POST.get("due_date")
-            course_id = request.POST.get("course_id")
-
-            Assignments.objects.create(
-                AssignmentName=assignment_name,
-                DueDate=due_date,
-                CourseId_id=course_id
-            )
-
-        return redirect('instructor_assignments', instructor_id=instructor_id)
-
 class TADashboard(View):
     def get(self, request, TA_id):
-        from ScheduleAppData.models import Courses, Assignments, Sections
+        from ScheduleAppData.models import Courses, Sections
         # Retrieve the instructor's account information
         TA = User.objects.get(pk=TA_id)
 
@@ -359,35 +311,28 @@ class CoursePage(View):
         from ScheduleAppData.models import Courses
         # Retrieve the course using the course_id from the URL
         course = Courses.objects.get(Id=course_id)
-        assignments = Assignments.objects.filter(CourseId=course)
         sections = Sections.objects.filter(CourseId=course)
 
         # Render the page with course, assignments, and sections
         return render(request, 'CoursePage.html', {
             'course': course,
-            'assignments': assignments,
             'sections': sections
         })
 
     def post(self, request, course_id):
-        from ScheduleAppData.models import Assignments, Courses, Sections
+        from ScheduleAppData.models import Courses, Sections
         # Retrieve the course using the course_id from the URL
         course = Courses.objects.get(Id=course_id)
 
-        if "add_assignment" in request.POST:
-            add_assignment(request, course)
-
-        elif "add_section" in request.POST:
+        if "add_section" in request.POST:
             add_section(request, course)
 
         # Fetch updated assignments and sections after the POST operation
-        assignments = Assignments.objects.filter(CourseId=course)
         sections = Sections.objects.filter(CourseId=course)
 
         # Re-render the page with updated data
         return render(request, 'CoursePage.html', {
             'course': course,
-            'assignments': assignments,
             'sections': sections
         })
 
