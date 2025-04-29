@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import path, include
 
 from ScheduleAppData.views import AdminDashboard, Accounts, Courses, InstructorDashboard, InstructorProfile, \
-    InstructorCourses, InstructorLabAssignments, InstructorAssignments, Login, TADashboard, AccountPage, CoursePage
+    InstructorCourses, InstructorLabAssignments, Login, TADashboard, AccountPage, CoursePage
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -32,7 +32,6 @@ urlpatterns = [
     path('instrcutor/profile/<int:instructor_id>/', InstructorProfile.as_view(), name='instructor_profile'),
     path('instrcutor/courses/<int:instructor_id>/', InstructorCourses.as_view(), name='instructor_courses'),
     path('instrcutor/lab-assignments/<int:instructor_id>/', InstructorLabAssignments.as_view(), name='instructor_lab_assignments'),
-    path('instrcutor/assignments/<int:instructor_id>/', InstructorAssignments.as_view(), name='instructor_assignments'),
     path('TADashboard/', TADashboard.as_view()),path('TADashboard/<int:TA_id>/', TADashboard.as_view(), name='TA_dashboard'),
 
 ]
