@@ -2,6 +2,7 @@ from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.views import View
 from django.db import IntegrityError
+from django.contrib.auth.hashers import make_password, check_password
 
 from ScheduleAppData.models import User, Courses, Sections, LabAssignment
 
@@ -22,7 +23,6 @@ def create_course(title, semester, year):
     if errors:
         return JsonResponse({"errors": errors}, status=400)
 
-
     try:
         # Create a new course
         Courses.objects.create(
@@ -34,6 +34,7 @@ def create_course(title, semester, year):
     except IntegrityError:
         return JsonResponse({"error": "A course with this name already exists."}, status=400)
 
+
 def add_section(request, course):
     """Helper method to handle adding a section."""
     section_num = request.POST.get("section_num")
@@ -43,8 +44,8 @@ def add_section(request, course):
     if instructor:
         Sections.objects.create(SectionNum=section_num, Schedule=schedule, InstructorId=instructor, CourseId=course)
 
-def create_account(first_name, last_name, email, password, phone, role):
 
+def create_account(first_name, last_name, email, password, phone, role):
     errors = {}
     if not first_name:
         errors['firstName'] = "First name cannot be empty."
@@ -70,12 +71,13 @@ def create_account(first_name, last_name, email, password, phone, role):
             FirstName=first_name,
             LastName=last_name,
             Email=email,
-            Password=password,
+            Password=make_password(password),
             Phone=phone,
             Role=role
         )
     except IntegrityError:
         return JsonResponse({"error": "An account with this email already exists."}, status=400)
+
 
 def deleteAccount(account_id=None):
     try:
@@ -84,6 +86,7 @@ def deleteAccount(account_id=None):
         return redirect("/accounts/")  # Redirect back to the accounts page
     except User.DoesNotExist:
         return JsonResponse({"error": "Account not found."}, status=404)
+
 
 def deleteCourse(course_id=None):
     from ScheduleAppData.models import Courses
@@ -94,6 +97,7 @@ def deleteCourse(course_id=None):
     except User.DoesNotExist:
         return JsonResponse({"error": "Account not found."}, status=404)
 
+
 def AuthenticateUser(email=None, password=None):
     if email is None or password is None:
         return False
@@ -103,12 +107,13 @@ def AuthenticateUser(email=None, password=None):
         user = User.objects.get(Email=email)
 
         # Compare the provided password with the stored password
-        if password == user.Password:
+        if check_password(password, user.Password):
             return user
         else:
             return False
     except User.DoesNotExist:
         return False
+
 
 def update_account(request, instructor):
     """Helper method to update the instructor's account information."""
@@ -118,9 +123,11 @@ def update_account(request, instructor):
     instructor.Phone = request.POST.get("phone")
     instructor.save()
 
+
 class AdminDashboard(View):
     def get(self, request):
         return render(request, "AdminDashboard.html")
+
     def post(self, request):
         action = request.POST.get("action")
 
@@ -135,29 +142,35 @@ class AdminDashboard(View):
                 role = request.POST.get("role")
 
                 create_account(first_name, last_name, email, password, phone, role)
-                return JsonResponse({"message": "Account created successfully! Use back button to get back to dashboard."})
+                return JsonResponse(
+                    {"message": "Account created successfully! Use back button to get back to dashboard."})
             case "create_course":
                 title = request.POST.get("title")
                 semester = request.POST.get("semester")
                 year = request.POST.get("year")
 
                 create_course(title, semester, year)
-                return JsonResponse({"message": "Course created successfully! Use back button to get back to dashboard."})
+                return JsonResponse(
+                    {"message": "Course created successfully! Use back button to get back to dashboard."})
             case _:
                 return JsonResponse({"error": "Invalid action."}, status=400)
+
 
 class Accounts(View):
     def get(self, request):
         AllAccounts = User.objects.all().values("FirstName", "LastName", "Email", "Phone", "Role", "Id")
         return render(request, "Accounts.html", {'accounts': AllAccounts})
+
     def post(self, request):
         action = request.POST.get("action")
         if action == "delete_account":
             account_id = request.POST.get("account_id")
             deleteAccount(account_id)
-            return JsonResponse({"message": "Account deleted successfully! Use back button to get back to All Accounts"})
+            return JsonResponse(
+                {"message": "Account deleted successfully! Use back button to get back to All Accounts"})
 
         return self.get(request)
+
 
 class Courses(View):
     def get(self, request):
@@ -177,6 +190,7 @@ class Courses(View):
 class Login(View):
     def get(self, request):
         return render(request, 'LoginPage.html')
+
     def post(self, request):
         email = request.POST.get('email')
         password = request.POST.get('password')
@@ -192,7 +206,6 @@ class Login(View):
                     return redirect('TA_dashboard', TA_id=validUser.Id)
         else:
             return render(request, 'LoginPage.html')
-
 
 
 # Instructor Dashboard
@@ -280,6 +293,7 @@ class InstructorLabAssignments(View):
 
         return redirect('instructor_lab_assignments', instructor_id=instructor_id)
 
+
 class TADashboard(View):
     def get(self, request, TA_id):
         from ScheduleAppData.models import Courses, Sections
@@ -296,6 +310,7 @@ class TADashboard(View):
             'courses': courses,
             'sections': Sections
         })
+
     def post(self, request, TA_id):
         # Retrieve the instructor's account information
         TA = User.objects.get(pk=TA_id)
@@ -305,6 +320,7 @@ class TADashboard(View):
 
         # Redirect to the same page to reflect changes
         return self.get(request, TA_id)
+
 
 class CoursePage(View):
     def get(self, request, course_id):
@@ -335,6 +351,7 @@ class CoursePage(View):
             'course': course,
             'sections': sections
         })
+
 
 class AccountPage(View):
     def get(self, request, account_id):
