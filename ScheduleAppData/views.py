@@ -211,7 +211,16 @@ class InstructorProfile(View):
         instructor = User.objects.get(Id=instructor_id)
 
         # Update the instructor's information
+        instructor.FirstName = request.POST.get("firstName")
+        instructor.LastName = request.POST.get("lastName")
         instructor.Email = request.POST.get("email")
+        instructor.Phone = request.POST.get("phone")
+
+        # Update password if provided
+        new_password = request.POST.get("password")
+        if new_password:
+            instructor.Password = new_password
+
         instructor.save()
 
         return redirect('instructor_dashboard', instructor_id=instructor.Id)
