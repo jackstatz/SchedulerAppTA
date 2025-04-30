@@ -217,13 +217,10 @@ class InstructorProfile(View):
     def post(self, request, instructor_id):
         instructor = User.objects.get(Id=instructor_id)
 
-        # Cannot change email
-        if 'email' in request.POST and request.POST['email'] != instructor.Email:
-            return JsonResponse({"error": "Email cannot be changed"}, status=400)
-
         # Update the instructor's information
         instructor.FirstName = request.POST.get("firstName")
         instructor.LastName = request.POST.get("lastName")
+        instructor.Email = request.POST.get("email")
         instructor.Phone = request.POST.get("phone")
 
         # Update password if provided

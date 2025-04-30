@@ -24,8 +24,8 @@
                     <input type="text" id="lastName" name="lastName" class="text-field" value="{{ instructor.LastName }}" required>
                 </div>
                 <div class="form-group">
-                    <label>Email (cannot be changed)</label>
-                    <div class="read-only-field">{{ instructor.Email }}</div>
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" class="text-field" value="{{ instructor.Email }}" required>
                 </div>
                 <div class="form-group">
                     <label for="phone">Phone Number</label>

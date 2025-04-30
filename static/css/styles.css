@@ -200,12 +200,3 @@ table th {
     padding: 20px;
     border-radius: 0 5px 5px 5px;
 }
-
-.read-only-field {
-    padding: 8px;
-    background-color: #f5f5f5;
-    border: 1px solid #ddd;
-    border-radius: 3px;
-    margin: 5px;
-    color: #555;
-}
