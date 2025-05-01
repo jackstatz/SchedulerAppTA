@@ -49,8 +49,7 @@
                         {% for section in sections %}
                             <li>
                                 <strong>Section:</strong> {{ section.SectionNum }}<br>
-                                <strong>Schedule:</strong> {{ section.Schedule }}<br>
-                                <strong>Instructor:</strong> {{ section.InstructorId.FirstName }} {{ section.InstructorId.LastName }}
+                                <strong>Schedule:</strong> {{ section.ScheduledDays }} {{ section.ScheduledStartTime }}- {{ section.ScheduledEndTime }}<br>
                             </li>
                         {% endfor %}
                     </ul>

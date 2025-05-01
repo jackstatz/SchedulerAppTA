@@ -253,8 +253,8 @@ class InstructorProfile(View):
 class InstructorCourses(View):
     def get(self, request, instructor_id):
         from ScheduleAppData.models import Courses
-        courses = Courses.objects.filter(sections__InstructorId=instructor_id).distinct()
         instructor = User.objects.get(Id=instructor_id)
+        courses = Courses.objects.filter(sections__Instructors=instructor).distinct()
         return render(request, "InstructorCourses.html", {'courses': courses, 'instructor': instructor})
 
     def post(self, request, instructor_id):
@@ -278,9 +278,9 @@ class TADashboard(View):
         TA = User.objects.get(pk=TA_id)
 
         # Retrieve all courses assigned to the instructor
-        courses = Courses.objects.filter(sections__InstructorId=TA).distinct()
+        courses = Courses.objects.filter(sections__Instructors=TA).distinct()
 
-        Sections = Sections.objects.filter(InstructorId=TA.Id)
+        Sections = Sections.objects.filter(Instructors=TA)
 
         return render(request, 'TADashboard.html', {
             'TA': TA,
