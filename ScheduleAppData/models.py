@@ -1,4 +1,15 @@
+from datetime import time
+
 from django.db import models
+
+class Days(models.TextChoices):
+    Sunday="U"
+    Monday="M"
+    Tuesday="T"
+    Wednesday="W"
+    Thursday="R"
+    Friday="F"
+    Saturday="S"
 
 # Create your models here.
 class User(models.Model):
@@ -29,13 +40,13 @@ class Sections(models.Model):
     ## The ID of the course this section is a part of
     CourseId = models.ForeignKey(Courses, on_delete=models.CASCADE)
     SectionNum = models.CharField(max_length=120)
-    Schedule = models.CharField(max_length=120)
+    ScheduledDays = models.CharField(
+        max_length=20,  # Adjust length based on the number of days
+        choices=Days.choices,
+        blank=True,
+        help_text="Comma-separated list of scheduled days (e.g., M,T,W).")
+    ScheduledStartTime = models.TimeField(default=time(9,0))
+    ScheduledEndTime = models.TimeField(default=time(10,0))
     SectionType = models.CharField(choices=SectionType.choices, max_length=20)
     ## The User ID of the instructor for this section
-    InstructorId = models.ForeignKey(User, on_delete=models.CASCADE)
-
-# Model to track the TA lab assignments
-class LabAssignment(models.Model):
-    Id = models.AutoField(primary_key=True)
-    SectionId = models.ForeignKey(Sections, on_delete=models.CASCADE)
-    TAId = models.ForeignKey(User, on_delete=models.CASCADE)
+    Instructors = models.ManyToManyField(User)
