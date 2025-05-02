@@ -4,7 +4,7 @@ from django.views import View
 from django.db import IntegrityError
 from django.contrib.auth.hashers import make_password, check_password
 
-from ScheduleAppData.models import User, Courses, Sections, LabAssignment
+from ScheduleAppData.models import User, Courses, Sections, Days
 
 
 # Create your views here.
@@ -38,11 +38,22 @@ def create_course(title, semester, year):
 def add_section(request, course):
     """Helper method to handle adding a section."""
     section_num = request.POST.get("section_num")
-    schedule = request.POST.get("schedule")
+    scheduledDays = request.POST.getlist("selectedDays")
     instructor_email = request.POST.get("instructor_email")
     instructor = User.objects.filter(Email=instructor_email).first()
+    startTime = request.POST.get("startTime")
+    endTime = request.POST.get("endTime")
     if instructor:
-        Sections.objects.create(SectionNum=section_num, Schedule=schedule, InstructorId=instructor, CourseId=course)
+        section = Sections.objects.create(SectionNum=section_num, ScheduledDays=",".join(scheduledDays), CourseId=course, ScheduledStartTime=startTime, ScheduledEndTime=endTime)
+        section.Instructors.add(instructor)
+
+def edit_section(request):
+    instructor_email = request.POST.get("instructor_email_add")
+    instructor = User.objects.filter(Email=instructor_email).first()
+    if instructor:
+        sectionID = request.POST.get("section_id_add")
+        section = Sections.objects.filter(Id=sectionID).first()
+        section.Instructors.add(instructor)
 
 
 def create_account(first_name, last_name, email, password, phone, role):
@@ -242,8 +253,8 @@ class InstructorProfile(View):
 class InstructorCourses(View):
     def get(self, request, instructor_id):
         from ScheduleAppData.models import Courses
-        courses = Courses.objects.filter(sections__InstructorId=instructor_id).distinct()
         instructor = User.objects.get(Id=instructor_id)
+        courses = Courses.objects.filter(sections__Instructors=instructor).distinct()
         return render(request, "InstructorCourses.html", {'courses': courses, 'instructor': instructor})
 
     def post(self, request, instructor_id):
@@ -260,49 +271,6 @@ class InstructorCourses(View):
         return redirect('instructor_courses', instructor_id=instructor_id)
 
 
-class InstructorLabAssignments(View):
-    def get(self, request, instructor_id):
-        from ScheduleAppData.models import LabAssignment, Courses, Sections
-        instructor = User.objects.get(Id=instructor_id)
-        courses = Courses.objects.filter(sections__InstructorId=instructor_id).distinct()
-        sections = Sections.objects.filter(InstructorId=instructor_id, SectionType="Lab")
-        tas = User.objects.filter(Role="TA")
-
-        # Get current assignments
-        assignments = LabAssignment.objects.filter(SectionId__InstructorId=instructor_id)
-
-        return render(request, "InstructorLabAssignments.html", {
-            'courses': courses,
-            'sections': sections,
-            'tas': tas,
-            'assignments': assignments,
-            'instructor': instructor
-        })
-
-    def post(self, request, instructor_id):
-        from ScheduleAppData.models import LabAssignment, Courses, Sections
-        action = request.POST.get("action")
-        if action == "assign_ta":
-            section_id = request.POST.get("section_id")
-            ta_id = request.POST.get("ta_id")
-
-            # Check if assignment already exists
-            existing = LabAssignment.objects.filter(SectionId_id=section_id)
-            if existing.exists():
-                # Update existing assignment
-                assignment = existing.first()
-                assignment.TAId_id = ta_id
-                assignment.save()
-            else:
-                # Create new assignment
-                LabAssignment.objects.create(
-                    SectionId_id=section_id,
-                    TAId_id=ta_id
-                )
-
-        return redirect('instructor_lab_assignments', instructor_id=instructor_id)
-
-
 class TADashboard(View):
     def get(self, request, TA_id):
         from ScheduleAppData.models import Courses, Sections
@@ -310,9 +278,9 @@ class TADashboard(View):
         TA = User.objects.get(pk=TA_id)
 
         # Retrieve all courses assigned to the instructor
-        courses = Courses.objects.filter(sections__InstructorId=TA).distinct()
+        courses = Courses.objects.filter(sections__Instructors=TA).distinct()
 
-        Sections = Sections.objects.filter(InstructorId=TA.Id)
+        Sections = Sections.objects.filter(Instructors=TA)
 
         return render(request, 'TADashboard.html', {
             'TA': TA,
@@ -337,11 +305,11 @@ class CoursePage(View):
         # Retrieve the course using the course_id from the URL
         course = Courses.objects.get(Id=course_id)
         sections = Sections.objects.filter(CourseId=course)
-
         # Render the page with course, assignments, and sections
         return render(request, 'CoursePage.html', {
             'course': course,
-            'sections': sections
+            'sections': sections,
+            'days':Days.choices
         })
 
     def post(self, request, course_id):
@@ -351,14 +319,16 @@ class CoursePage(View):
 
         if "add_section" in request.POST:
             add_section(request, course)
-
+        elif "edit_section" in request.POST:
+            edit_section(request)
         # Fetch updated assignments and sections after the POST operation
         sections = Sections.objects.filter(CourseId=course)
 
         # Re-render the page with updated data
         return render(request, 'CoursePage.html', {
             'course': course,
-            'sections': sections
+            'sections': sections,
+            'days': Days.choices
         })
 
 
