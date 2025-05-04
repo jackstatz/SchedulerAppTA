@@ -344,7 +344,12 @@ class AccountPage(View):
     def get(self, request, account_id):
         # Retrieve the account using the account_id
         account = User.objects.get(Id=account_id)
-        return render(request, 'AccountPage.html', {'account': account})
+
+        office_hour_days_list = account.OfficeHourDays.split(",") if account.OfficeHourDays else []
+        return render(request, 'AccountPage.html',
+                        {'account': account,
+                                'days': Days.choices,
+                                 'office_hour_days_list': office_hour_days_list})
 
     def post(self, request, account_id):
         # Retrieve the account using the account_id
@@ -352,7 +357,6 @@ class AccountPage(View):
 
         # Handle account updates (example: updating phone number)
         if "update_account" in request.POST:
-            account.Phone = request.POST.get("phone")
-            account.save()
+            update_account(request, account)
 
         return render(request, 'AccountPage.html', {'account': account})
