@@ -25,6 +25,14 @@ class User(models.Model):
     Password = models.CharField(max_length=120)
     Phone = models.CharField(max_length=120)
     Role = models.CharField(choices=Role.choices, max_length=20)
+    OfficeHourDays = models.CharField(
+        max_length=20,  # Adjust length based on the number of days
+        choices=Days.choices,
+        blank=True,
+        help_text="Comma-separated list of scheduled days (e.g., M,T,W).")
+    OfficeHourStartTime = models.TimeField(default=time(9,0))
+    OfficeHourEndTime = models.TimeField(default=time(10,0))
+    HomeAddress = models.CharField(max_length=120, default='')
 
 class Courses(models.Model):
     Id = models.AutoField(primary_key=True)

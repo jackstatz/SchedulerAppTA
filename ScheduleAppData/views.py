@@ -132,6 +132,15 @@ def update_account(request, instructor):
     instructor.LastName = request.POST.get("lastName")
     instructor.Email = request.POST.get("email")
     instructor.Phone = request.POST.get("phone")
+    instructor.HomeAddress = request.POST.get("homeAddress")
+    OfficeHoursDays = request.POST.getlist("selectedDays")
+    instructor.OfficeHourDays = ",".join(OfficeHoursDays)
+    instructor.OfficeHourStartTime = request.POST.get("officeHourStartTime") or instructor.OfficeHourStartTime
+    instructor.OfficeHourEndTime = request.POST.get("officeHourEndTime") or instructor.OfficeHourEndTime
+    newPassword = request.POST.get("password")
+    if newPassword:
+        instructor.Password = make_password(newPassword)
+
     instructor.save()
 
 
@@ -229,23 +238,18 @@ class InstructorDashboard(View):
 class InstructorProfile(View):
     def get(self, request, instructor_id):
         instructor = User.objects.get(Id=instructor_id)
-        return render(request, "InstructorProfile.html", {'instructor': instructor})
+
+        office_hour_days_list = instructor.OfficeHourDays.split(",") if instructor.OfficeHourDays else []
+        return render(request, "InstructorProfile.html",
+                      {'instructor': instructor,
+                                'days': Days.choices,
+                                'office_hour_days_list': office_hour_days_list})
 
     def post(self, request, instructor_id):
         instructor = User.objects.get(Id=instructor_id)
 
-        # Update the instructor's information
-        instructor.FirstName = request.POST.get("firstName")
-        instructor.LastName = request.POST.get("lastName")
-        instructor.Email = request.POST.get("email")
-        instructor.Phone = request.POST.get("phone")
-
-        # Update password if provided
-        new_password = request.POST.get("password")
-        if new_password:
-            instructor.Password = new_password
-
-        instructor.save()
+        if "update_account" in request.POST:
+            update_account(request, instructor)
 
         return redirect('instructor_dashboard', instructor_id=instructor.Id)
 
@@ -282,10 +286,14 @@ class TADashboard(View):
 
         Sections = Sections.objects.filter(Instructors=TA)
 
+        office_hour_days_list = TA.OfficeHourDays.split(",") if TA.OfficeHourDays else []
+
         return render(request, 'TADashboard.html', {
             'TA': TA,
             'courses': courses,
-            'sections': Sections
+            'sections': Sections,
+            'days': Days.choices,
+            'office_hour_days_list': office_hour_days_list
         })
 
     def post(self, request, TA_id):
