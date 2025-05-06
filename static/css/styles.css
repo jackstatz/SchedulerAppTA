@@ -49,7 +49,7 @@ body {
   -webkit-user-select: none;
   vertical-align: middle;
   white-space: nowrap;
-  width: 20%;
+  width: auto;
 }
 
 .button:after {
@@ -138,19 +138,19 @@ body {
     border: 1px solid #ddd;
 }
 
-table {
+.table-class {
     width: 100%;
     border-collapse: collapse;
     margin: 20px 0;
 }
 
-table th, table td {
+.table-class th, td {
     padding: 10px;
     text-align: left;
     border: 1px solid #ddd;
 }
 
-table th {
+.table-class th {
     background-color: #f2f2f2;
 }
 
@@ -199,4 +199,14 @@ table th {
     border: 1px solid #ddd;
     padding: 20px;
     border-radius: 0 5px 5px 5px;
+}
+
+.section-table-class{
+    border-collapse: collapse !important;
+    margin-left: 0 !important;
+    border: none !important;
+}
+
+.section-table-class td, .section-table-class th {
+    border: none !important;
 }
