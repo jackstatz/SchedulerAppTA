@@ -16,23 +16,49 @@
             <h2>Account Information</h2>
             <form method="POST">
                 {% csrf_token %}
-                <div class="form-group">
-                    <label for="firstName">First Name:</label>
-                    <input type="text" id="firstName" name="firstName" value="{{ TA.FirstName }}" class="text-field" required>
-                </div>
-                <div class="form-group">
-                    <label for="lastName">Last Name:</label>
-                    <input type="text" id="lastName" name="lastName" value="{{ TA.LastName }}" class="text-field" required>
-                </div>
-                <div class="form-group">
-                    <label for="email">Email:</label>
-                    <input type="email" id="email" name="email" value="{{ TA.Email }}" class="text-field" required>
-                </div>
-                <div class="form-group">
-                    <label for="phone">Phone:</label>
-                    <input type="tel" id="phone" name="phone" value="{{ TA.Phone }}" class="text-field" required>
-                </div>
-                <button type="submit" name="update_account" class="button">Save Changes</button>
+                <table class="section-table-class">
+                    <tr>
+                        <td><label for="firstName">First Name:</label></td>
+                        <td><input type="text" id="firstName" name="firstName" value="{{ TA.FirstName }}" class="text-field" required></td>
+                        <td><label for="lastName">Last Name:</label></td>
+                        <td><input type="text" id="lastName" name="lastName" value="{{ TA.LastName }}" class="text-field" required></td>
+                    </tr>
+                    <tr>
+                        <td><label for="email">Email:</label></td>
+                        <td><input type="email" id="email" name="email" value="{{ TA.Email }}" class="text-field" required></td>
+                        <td><label for="phone">Phone:</label></td>
+                        <td><input type="tel" id="phone" name="phone" value="{{ TA.Phone }}" class="text-field" required></td>
+                    </tr>
+                    <tr>
+                        <td><label for="homeAddress">Home Address:</label></td>
+                        <td><input type="text" id="homeAddress" name="homeAddress" value="{{ TA.HomeAddress }}" class="text-field"></td>
+                        <td><label for="password">New Password:</label></td>
+                        <td><input type="password" id="password" name="password" class="text-field">(Leave blank to keep password)</td>
+                    </tr>
+                    <tr>
+                        <td><label for="selectedDays">Office Hours Days:</label></td>
+                        <td colspan="3">
+                            <div>
+                                {% for day in days %}
+                                    <label>
+                                        <input type="checkbox" name="selectedDays" value={{ day.0 }} {% if day.0 in office_hour_days_list %}checked{% endif %}> {{ day.1 }}
+                                    </label><br>
+                                {% endfor %}
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><label for="officeHourStartTime">Office Hour Start Time:</label></td>
+                        <td><input type="time" id="officeHourStartTime" name="officeHourStartTime" value="{{ TA.OfficeHourStartTime|date:'H:i' }}" class="text-field" required></td>
+                        <td><label for="officeHourEndTime">Office Hour End Time:</label></td>
+                        <td><input type="time" id="officeHourEndTime" name="officeHourEndTime" value="{{ TA.OfficeHourEndTime|date:'H:i' }}" class="text-field" required></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4" style="text-align: center;">
+                            <button type="submit" name="update_account" class="button">Save Changes</button>
+                        </td>
+                    </tr>
+                </table>
             </form>
         </div>
 

@@ -33,36 +33,45 @@
             <h4>Add Section</h4>
             <form method="POST">
                 {% csrf_token %}
-                <div class="form-group">
-                    <label for="section_num">Section Number:</label>
-                    <input type="text" id="section_num" name="section_num" class="text-field" required>
-                </div>
-                <div class="form-group">
-                    <label>Select days to meet:</label>
-                    <br>
-                    {% for day in days %}
-                        <label>
-                            <input type="checkbox" name="selectedDays" value={{ day.0 }}> {{ day.1 }}
-                        </label><br>
-                    {% endfor %}
-                    <label for="startTime">Select a start time:</label>
-                    <input type="time" id="startTime" name="startTime">
-                    <br>
-                    <label for="endTime">Select an end time:</label>
-                    <input type="time" id="endTime" name="endTime">
-                </div>
-                <div class="form-group">
-                    <label for="instructor_email">Instructor Email:</label>
-                    <input type="email" id="instructor_email" name="instructor_email" class="text-field" required>
-                </div>
-                <div class="form-group">
-                    <label for="type">Type</label>
-                    <select name="type" id="type" class="select">
-                        <option value="Lab">Lab</option>
-                        <option value="Lecture">Lecture</option>
-                    </select>
-                </div>
-                <button type="submit" name="add_section" class="button">Add Section</button>
+                <table class="section-table-class">
+                    <tr>
+                        <td><label for="section_num">Section Number:</label></td>
+                        <td><input type="text" id="section_num" name="section_num" class="text-field" required></td>
+                        <td><label for="instructor_email">Instructor Email:</label></td>
+                        <td><input type="email" id="instructor_email" name="instructor_email" class="text-field" required></td>
+                    </tr>
+                    <tr>
+                        <td><label>Select days to meet:</label></td>
+                        <td colspan="3">
+                            {% for day in days %}
+                                <label>
+                                    <input type="checkbox" name="selectedDays" value="{{ day.0 }}"> {{ day.1 }}
+                                </label>
+                                <br>
+                            {% endfor %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><label for="startTime">Select a start time:</label></td>
+                        <td><input type="time" id="startTime" name="startTime"></td>
+                        <td><label for="endTime">Select an end time:</label></td>
+                        <td><input type="time" id="endTime" name="endTime"></td>
+                    </tr>
+                    <tr>
+                        <td><label for="type">Type:</label></td>
+                        <td>
+                            <select name="type" id="type" class="select">
+                                <option value="Lab">Lab</option>
+                                <option value="Lecture">Lecture</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" style="text-align: center;">
+                            <button type="submit" name="add_section" class="button">Add Section</button>
+                        </td>
+                    </tr>
+                </table>
             </form>
         </div>
         <a href="/courses/" class="button">Back to Courses</a>
