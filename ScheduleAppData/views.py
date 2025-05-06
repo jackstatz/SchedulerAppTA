@@ -128,6 +128,7 @@ def AuthenticateUser(email=None, password=None):
 
 def update_account(request, instructor):
     """Helper method to update the instructor's account information."""
+    print(request.POST)
     instructor.FirstName = request.POST.get("firstName")
     instructor.LastName = request.POST.get("lastName")
     instructor.Email = request.POST.get("email")
@@ -358,5 +359,6 @@ class AccountPage(View):
         # Handle account updates (example: updating phone number)
         if "update_account" in request.POST:
             update_account(request, account)
-
-        return render(request, 'AccountPage.html', {'account': account})
+        account = User.objects.get(Id=account_id)
+        office_hour_days_list = account.OfficeHourDays.split(",") if account.OfficeHourDays else []
+        return render(request, 'AccountPage.html', {'account': account, 'days': Days.choices, 'office_hour_days_list': office_hour_days_list})
