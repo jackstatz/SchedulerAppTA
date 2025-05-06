@@ -34,11 +34,17 @@ class User(models.Model):
     OfficeHourEndTime = models.TimeField(default=time(10,0))
     HomeAddress = models.CharField(max_length=120, default='')
 
+    def __str__(self):
+        return f"{self.FirstName} {self.LastName}"
+
 class Courses(models.Model):
     Id = models.AutoField(primary_key=True)
     CourseName = models.CharField(max_length=120)
     Semester = models.CharField(max_length=120)
     Year = models.IntegerField()
+
+    def __str__(self):
+        return f"{self.CourseName} - {self.Semester} {self.Year}"
 
 class Sections(models.Model):
     class SectionType(models.TextChoices):
@@ -58,3 +64,6 @@ class Sections(models.Model):
     SectionType = models.CharField(choices=SectionType.choices, max_length=20)
     ## The User ID of the instructor for this section
     Instructors = models.ManyToManyField(User)
+
+    def __str__(self):
+        return f"{self.CourseId} - Section {self.SectionNum} ({self.SectionType})"
