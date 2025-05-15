@@ -131,13 +131,13 @@ def update_account(request, instructor):
     print(request.POST)
     instructor.FirstName = request.POST.get("firstName")
     instructor.LastName = request.POST.get("lastName")
-    instructor.Email = request.POST.get("email")
     instructor.Phone = request.POST.get("phone")
     instructor.HomeAddress = request.POST.get("homeAddress")
     OfficeHoursDays = request.POST.getlist("selectedDays")
     instructor.OfficeHourDays = ",".join(OfficeHoursDays)
     instructor.OfficeHourStartTime = request.POST.get("officeHourStartTime") or instructor.OfficeHourStartTime
     instructor.OfficeHourEndTime = request.POST.get("officeHourEndTime") or instructor.OfficeHourEndTime
+    instructor.OfficeLocation = request.POST.get("officeHourLocation") or instructor.OfficeLocation
     newPassword = request.POST.get("password")
     if newPassword:
         instructor.Password = make_password(newPassword)
@@ -232,8 +232,13 @@ class Login(View):
 # Instructor Dashboard
 class InstructorDashboard(View):
     def get(self, request, instructor_id):
+        from ScheduleAppData.models import Courses
         instructor = User.objects.get(Id=instructor_id)
-        return render(request, "InstructorDashboard.html", {'instructor': instructor})
+        # Retrieve all courses assigned to the instructor
+        courses = Courses.objects.filter(sections__Instructors=instructor).distinct()
+        for course in courses:
+            course.sections = Sections.objects.filter(CourseId=course.Id)
+        return render(request, "InstructorDashboard.html", {'instructor': instructor, 'courses': courses})
 
 
 class InstructorProfile(View):
@@ -260,6 +265,7 @@ class InstructorCourses(View):
         from ScheduleAppData.models import Courses
         instructor = User.objects.get(Id=instructor_id)
         courses = Courses.objects.filter(sections__Instructors=instructor).distinct()
+
         return render(request, "InstructorCourses.html", {'courses': courses, 'instructor': instructor})
 
     def post(self, request, instructor_id):
@@ -272,6 +278,11 @@ class InstructorCourses(View):
             course = Courses.objects.get(Id=course_id)
             course.CourseName = course_name
             course.save()
+        elif action == "edit_section":
+            TA = request.POST.get("instructor_email_add")
+            ### Confirm that the instructor is adding a TA, not another instructor
+            if TA.Role == "TA":
+                edit_section(request)
 
         return redirect('instructor_courses', instructor_id=instructor_id)
 
@@ -284,15 +295,14 @@ class TADashboard(View):
 
         # Retrieve all courses assigned to the instructor
         courses = Courses.objects.filter(sections__Instructors=TA).distinct()
-
-        Sections = Sections.objects.filter(Instructors=TA)
+        for course in courses:
+            course.sections = Sections.objects.filter(CourseId=course.Id)
 
         office_hour_days_list = TA.OfficeHourDays.split(",") if TA.OfficeHourDays else []
 
         return render(request, 'TADashboard.html', {
             'TA': TA,
             'courses': courses,
-            'sections': Sections,
             'days': Days.choices,
             'office_hour_days_list': office_hour_days_list
         })
