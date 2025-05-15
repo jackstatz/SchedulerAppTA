@@ -32,6 +32,7 @@ class User(models.Model):
         help_text="Comma-separated list of scheduled days (e.g., M,T,W).")
     OfficeHourStartTime = models.TimeField(default=time(9,0))
     OfficeHourEndTime = models.TimeField(default=time(10,0))
+    OfficeLocation = models.CharField(max_length=120, default='')
     HomeAddress = models.CharField(max_length=120, default='')
 
     def __str__(self):

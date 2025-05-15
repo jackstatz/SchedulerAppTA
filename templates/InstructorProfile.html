@@ -24,7 +24,7 @@
                     </tr>
                     <tr>
                         <td><label for="email">Email:</label></td>
-                        <td><input type="email" id="email" name="email" value="{{ instructor.Email }}" class="text-field" required></td>
+                        <td><p style="margin-left: 5px;">{{ instructor.Email }}</p></td>
                         <td><label for="phone">Phone:</label></td>
                         <td><input type="tel" id="phone" name="phone" value="{{ instructor.Phone }}" class="text-field" required></td>
                     </tr>
@@ -36,7 +36,7 @@
                     </tr>
                     <tr>
                         <td><label for="selectedDays">Office Hours Days:</label></td>
-                        <td colspan="3">
+                        <td>
                             <div>
                                 {% for day in days %}
                                     <label>
@@ -45,6 +45,8 @@
                                 {% endfor %}
                             </div>
                         </td>
+                        <td><label for="officeHourLocation">Office Location:</label></td>
+                        <td><input type="text" id="officeHourLocation" name="officeHourLocation" value="{{ instructor.OfficeLocation}}" class="text-field" required></td>
                     </tr>
                     <tr>
                         <td><label for="officeHourStartTime">Office Hour Start Time:</label></td>

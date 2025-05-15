@@ -25,7 +25,7 @@
                     </tr>
                     <tr>
                         <td><label for="email">Email:</label></td>
-                        <td><input type="email" id="email" name="email" value="{{ TA.Email }}" class="text-field" required></td>
+                        <td><p style="margin-left: 5px;">{{ TA.Email }}</p></td>
                         <td><label for="phone">Phone:</label></td>
                         <td><input type="tel" id="phone" name="phone" value="{{ TA.Phone }}" class="text-field" required></td>
                     </tr>
@@ -37,7 +37,7 @@
                     </tr>
                     <tr>
                         <td><label for="selectedDays">Office Hours Days:</label></td>
-                        <td colspan="3">
+                        <td>
                             <div>
                                 {% for day in days %}
                                     <label>
@@ -46,6 +46,8 @@
                                 {% endfor %}
                             </div>
                         </td>
+                        <td><label for="officeHourLocation">Office Location:</label></td>
+                        <td><input type="text" id="officeHourLocation" name="officeHourLocation" value="{{ TA.OfficeLocation}}" class="text-field" required></td>
                     </tr>
                     <tr>
                         <td><label for="officeHourStartTime">Office Hour Start Time:</label></td>
@@ -72,7 +74,7 @@
                     <!-- Sections of the Course -->
                     <h4>Sections</h4>
                     <ul>
-                        {% for section in sections %}
+                        {% for section in course.sections %}
                             <li>
                                 <strong>Section:</strong> {{ section.SectionNum }}<br>
                                 <strong>Schedule:</strong> {{ section.ScheduledDays }} {{ section.ScheduledStartTime }}- {{ section.ScheduledEndTime }}<br>
